@@ -3,13 +3,12 @@ const { uploadToCloudinary } = require('../utils/cloudinary');
 
 // 1. Configure Multer to store files in memory (buffer)
 const storage = multer.memoryStorage();
-exports.multerUpload = multer({
+const multerUpload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024, // 5MB limit per file
   },
   fileFilter: (req, file, cb) => {
-    // Only allow image mime types
     if (!file.mimetype.startsWith('image/')) {
       return cb(new Error('Only image files are allowed!'), false);
     }
@@ -17,24 +16,36 @@ exports.multerUpload = multer({
   },
 });
 
-// 2. Middleware to handle the upload to Cloudinary after Multer runs
-exports.uploadToCloudinary = async (req, res, next) => {
-  // Check if Multer processed a file
-  if (!req.file) {
-    // No file provided, proceed to the next middleware/controller
-    return next();
-  }
-
+// 2. Middleware to handle single upload (for User Profile)
+const uploadSingleToCloudinary = async (req, res, next) => {
+  if (!req.file) return next();
   try {
-    // req.file.buffer contains the image data from multer
     const fileUrl = await uploadToCloudinary(req.file.buffer);
-    
-    // Attach the secure Cloudinary URL to the request body for the controller to save
     req.fileUrl = fileUrl; 
-    
     next();
   } catch (error) {
-    console.error('Cloudinary Upload Error:', error);
     return res.status(500).json({ success: false, error: 'Image upload failed.' });
   }
+};
+
+// 3. NEW: Middleware to handle multiple uploads (for Products)
+const uploadMultipleToCloudinary = async (req, res, next) => {
+  if (!req.files || req.files.length === 0) return next();
+  
+  try {
+    const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer));
+    const urls = await Promise.all(uploadPromises);
+    
+    req.imageUrls = urls; // Array of URLs
+    next();
+  } catch (error) {
+    console.error("Multiple Upload Error", error);
+    return res.status(500).json({ success: false, error: 'Failed to upload one or more images.' });
+  }
+};
+
+module.exports = {
+  multerUpload,
+  uploadToCloudinary: uploadSingleToCloudinary, // Export original name for compatibility
+  uploadMultipleToCloudinary // Export new one
 };

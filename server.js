@@ -41,17 +41,15 @@ const authRoutes = require('./src/routes/authRoutes');
 const userRoutes = require('./src/routes/userRoutes'); 
 const productRoutes = require('./src/routes/productRoutes');
 const messageRoutes = require('./src/routes/messageRoutes');
+const orderRoutes = require('./src/routes/orderRoutes'); 
 const { handleSocketConnection } = require('./src/controllers/messageController');
 
 // --- Mount Routes ---
-// Auth: /api/auth/register, /api/auth/login, /api/auth/me
 app.use('/api/auth', authRoutes);
-// Users: /api/users/consultants, /api/users/:id (profile update)
 app.use('/api/users', userRoutes); 
-// Products: /api/products (Requires separate implementation)
 app.use('/api/products', productRoutes);
-// Messages: /api/messages/:recipientId (History)
 app.use('/api/messages', messageRoutes); 
+app.use('/api/orders', orderRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
