@@ -1,16 +1,26 @@
 const express = require('express');
-const { getProducts, addProduct } = require('../controllers/productController');
-const { protect, authorize } = require('../middleware/authMiddleware');
-
 const router = express.Router();
+const { 
+    getProducts, 
+    getProductById, 
+    createProduct, 
+    deleteProduct // Import the new function
+} = require('../controllers/productController');
+const { protect, authorize } = require('../middleware/authMiddleware');
+const { multerUpload, uploadMultipleToCloudinary } = require('../middleware/uploadMiddleware');
 
-router.use(protect); // All product routes require login
+router.route('/')
+    .get(getProducts)
+    .post(
+        protect, 
+        authorize('admin', 'consultant'), 
+        multerUpload.array('images', 8), 
+        uploadMultipleToCloudinary,      
+        createProduct
+    );
 
-// @route   GET /api/products
-router.get('/', getProducts);
-
-// @route   POST /api/products
-// Only consultants can add products
-router.post('/', authorize('consultant'), addProduct);
+router.route('/:id')
+    .get(getProductById)
+    .delete(protect, authorize('admin', 'consultant'), deleteProduct); // Add DELETE route
 
 module.exports = router;

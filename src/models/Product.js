@@ -1,35 +1,30 @@
 const mongoose = require('mongoose');
 
-const ProductSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Please add a product name'],
-        trim: true
-    },
-    description: {
-        type: String,
-        required: [true, 'Please add a description']
-    },
-    price: {
-        type: Number,
-        required: [true, 'Please add a price']
-    },
-    imageUrl: {
-        type: String,
-        default: 'https://placehold.co/600x400/CCCCCC/000000?text=Pet+Product'
-    },
-    category: {
-        type: String,
-        enum: ['medication', 'food', 'accessories', 'supplements'],
-        default: 'medication'
-    },
-    createdBy: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
-        required: true
-    }
-}, {
-    timestamps: true
-});
+const reviewSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    rating: { type: Number, required: true },
+    comment: { type: String, required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+}, { timestamps: true });
 
-module.exports = mongoose.model('Product', ProductSchema);
+const productSchema = new mongoose.Schema({
+    user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+    name: { type: String, required: true },
+    images: [{ type: String, required: true }], // Array of image URLs
+    brand: { type: String, required: true },
+    category: { type: String, required: true },
+    description: { type: String, required: true },
+    
+    // New Seller Details
+    sellerAddress: { type: String },
+    sellerContact: { type: String },
+    sellerEmail: { type: String },
+
+    reviews: [reviewSchema],
+    rating: { type: Number, required: true, default: 0 },
+    numReviews: { type: Number, required: true, default: 0 },
+    price: { type: Number, required: true, default: 0 },
+    countInStock: { type: Number, required: true, default: 0 },
+}, { timestamps: true });
+
+module.exports = mongoose.model('Product', productSchema);
