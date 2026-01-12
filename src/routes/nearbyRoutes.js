@@ -1,5 +1,6 @@
 const express = require('express');
-const { getNearbyPlaces } = require('../controllers/nearbyController.js ');
+// Fixed: Removed the trailing space from the require path
+const { getNearbyPlaces } = require('../controllers/nearbyController');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();

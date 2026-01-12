@@ -1,22 +1,16 @@
 const express = require('express');
-const { register, login, getMe } = require('../controllers/authController');
+// Destructure the exactly exported functions from the controller
+const { register, login, getMe, sendOTP } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// @desc    Register a user or consultant
-// @route   POST /api/auth/register
-// @access  Public
+// Public routes
+router.post('/send-otp', sendOTP);
 router.post('/register', register);
-
-// @desc    Login a user or consultant
-// @route   POST /api/auth/login
-// @access  Public
 router.post('/login', login);
 
-// @desc    Get current logged in user (Check token validity)
-// @route   GET /api/auth/me
-// @access  Private
+// Private routes
 router.get('/me', protect, getMe); 
 
 module.exports = router;
