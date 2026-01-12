@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const UserSchema = new mongoose.Schema({
-    // Unique ID for external reference (using uuid)
     userId: {
         type: String,
         unique: true,
@@ -20,56 +19,51 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         match: [ /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please use a valid email address' ]
     },
+    mobile: {
+        type: String,
+        required: [true, 'Please add a 10-digit mobile number'],
+        // Validates 10 digits starting with 6-9
+        match: [/^[6-9]\d{9}$/, 'Please add a valid 10-digit mobile number']
+    },
     password: {
         type: String,
         required: [true, 'Please add a password'],
-        minlength: 6,
-        select: false // Do not return password by default on queries
+        minlength: 8,
+        select: false 
     },
-    // User or Consultant role distinction
+    // Structured Address as requested
     role: {
         type: String,
-        enum: ['user', 'consultant'],
+        enum: ['user', 'consultant', 'admin'],
         default: 'user'
     },
-    // Cloudinary URL for the profile picture
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
     profilePicture: {
         type: String,
-        default: 'https://placehold.co/400x400/CCCCCC/000000?text=Profile' // Default placeholder
+        default: 'https://placehold.co/400x400/CCCCCC/000000?text=Profile'
     },
-    // Consultant-specific fields
-    expertise: {
-        type: [String], 
-        required: function() { return this.role === 'consultant'; },
-        default: []
-    },
-    bio: {
-        type: String,
-        maxlength: 500,
-        required: function() { return this.role === 'consultant'; }
-    }
+    expertise: { type: [String], default: [] },
+    bio: { type: String, maxlength: 500 }
 }, {
     timestamps: true
 });
 
-// Mongoose middleware to hash password before saving
 UserSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) {
-        next();
-    }
+    if (!this.isModified('password')) next();
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Method to compare entered password with hashed password in database
 UserSchema.methods.matchPassword = async function(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Method to generate JWT token
 UserSchema.methods.getSignedJwtToken = function() {
     return jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
-        expiresIn: '30d' // Token expires in 30 days
+        expiresIn: '30d'
     });
 };
 

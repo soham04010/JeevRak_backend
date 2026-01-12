@@ -11,14 +11,18 @@ exports.getNearbyPlaces = async (req, res) => {
         return res.status(400).json({ success: false, error: "Latitude and Longitude are required" });
     }
 
+    if (!apiKey) {
+        return res.status(500).json({ success: false, error: "Maps API Key is missing on the server" });
+    }
+
     try {
-        // We search for two types: veterinary_care (Clinics) and pet_store (Shops)
+        // Search for veterinary_care (Clinics) and pet_store (Shops)
         // radius is in meters (5000 = 5km)
         const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=5000&types=veterinary_care|pet_store&key=${apiKey}`;
 
         const response = await axios.get(url);
         
-        // Map Google data to our cleaner format
+        // Map Google data to a cleaner format for the frontend
         const places = response.data.results.map(item => ({
             id: item.place_id,
             name: item.name,
@@ -31,7 +35,7 @@ exports.getNearbyPlaces = async (req, res) => {
 
         res.status(200).json({ success: true, count: places.length, data: places });
     } catch (error) {
-        console.error("Google Places Error:", error.message);
+        console.error("Google Places API Error:", error.message);
         res.status(500).json({ success: false, error: "Failed to fetch nearby places" });
     }
 };
