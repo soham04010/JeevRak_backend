@@ -43,14 +43,14 @@ const productRoutes = require('./src/routes/productRoutes');
 const messageRoutes = require('./src/routes/messageRoutes');
 const orderRoutes = require('./src/routes/orderRoutes'); 
 const { handleSocketConnection } = require('./src/controllers/messageController');
-const nearbyRoutes = require('./src/routes/nearbyRoutes'); 
+// const nearbyRoutes = require('./src/routes/nearbyRoutes'); 
 // --- Mount Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes); 
 app.use('/api/products', productRoutes);
 app.use('/api/messages', messageRoutes); 
 app.use('/api/orders', orderRoutes);
-app.use('/api/nearby', nearbyRoutes);
+// app.use('/api/nearby', nearbyRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
