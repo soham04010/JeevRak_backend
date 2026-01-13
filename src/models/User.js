@@ -43,7 +43,7 @@ const UserSchema = new mongoose.Schema({
     },
     profilePicture: {
         type: String,
-        default: 'https://placehold.co/400x400/CCCCCC/000000?text=Profile'
+        default: 'default-user'
     },
     expertise: { type: [String], default: [] },
     bio: { type: String, maxlength: 500 }
