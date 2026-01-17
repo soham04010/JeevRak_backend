@@ -2,6 +2,14 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const AddressSchema = new mongoose.Schema({
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    zipCode: { type: String, required: true },
+    isDefault: { type: Boolean, default: false }
+});
+
 const UserSchema = new mongoose.Schema({
     userId: {
         type: String,
@@ -22,7 +30,6 @@ const UserSchema = new mongoose.Schema({
     mobile: {
         type: String,
         required: [true, 'Please add a 10-digit mobile number'],
-        // Validates 10 digits starting with 6-9
         match: [/^[6-9]\d{9}$/, 'Please add a valid 10-digit mobile number']
     },
     password: {
@@ -31,12 +38,12 @@ const UserSchema = new mongoose.Schema({
         minlength: 8,
         select: false 
     },
-    // Structured Address as requested
     role: {
         type: String,
         enum: ['user', 'consultant', 'admin'],
         default: 'user'
     },
+    addresses: [AddressSchema], // Added addresses array
     isVerified: {
         type: Boolean,
         default: false
