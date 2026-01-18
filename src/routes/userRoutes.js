@@ -1,9 +1,11 @@
 const express = require('express');
 const { 
     getConsultants, 
-    updateUserProfile 
-} = require('../controllers/userController'); // Renamed controller import
-const { protect, authorize } = require('../middleware/authMiddleware');
+    updateUserProfile,
+    addAddress,
+    deleteAddress
+} = require('../controllers/userController'); 
+const { protect } = require('../middleware/authMiddleware');
 const { multerUpload, uploadToCloudinary } = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
@@ -12,18 +14,25 @@ const router = express.Router();
 router.use(protect);
 
 // @route   GET /api/users/consultants
-// @desc    Get all consultants (with filtering/search)
-// @access  Private (Requires login)
 router.get('/consultants', getConsultants);
 
 // @route   PUT /api/users/:id
-// @desc    Update user or consultant profile (including profile picture)
-// @access  Private (User can only update their own profile)
+// @desc    Update profile (Handles image upload + profile data)
 router.put(
     '/:id',
-    multerUpload.single('profilePicture'), // 1. Multer processes the file and saves buffer
-    uploadToCloudinary, // 2. Uploads to Cloudinary and attaches URL to req.fileUrl
-    updateUserProfile // 3. Controller saves URL and other profile data
+    multerUpload.single('profilePicture'), 
+    uploadToCloudinary, 
+    updateUserProfile 
 );
+
+// --- Address Management Routes ---
+
+// @route   POST /api/users/address
+// @desc    Add a new address to user profile
+router.post('/address', addAddress);
+
+// @route   DELETE /api/users/address/:addressId
+// @desc    Remove an address from user profile
+router.delete('/address/:addressId', deleteAddress);
 
 module.exports = router;

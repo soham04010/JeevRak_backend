@@ -43,7 +43,7 @@ const UserSchema = new mongoose.Schema({
         enum: ['user', 'consultant', 'admin'],
         default: 'user'
     },
-    addresses: [AddressSchema], // Added addresses array
+    addresses: [AddressSchema],
     isVerified: {
         type: Boolean,
         default: false
@@ -58,8 +58,11 @@ const UserSchema = new mongoose.Schema({
     timestamps: true
 });
 
-UserSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) next();
+// FIX: Removed 'next' and used return statements to prevent "next is not a function" error
+UserSchema.pre('save', async function() {
+    if (!this.isModified('password')) {
+        return;
+    }
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
